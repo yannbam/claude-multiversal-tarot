@@ -62,6 +62,38 @@ const threeCard = tarot.claudeTarot("How is my approach evolving?", "threeCard")
 const crossroads = tarot.claudeTarot("Which path should I explore?", "crossroads");
 ```
 
+### Command Line Options
+
+```bash
+# Basic usage
+node claude_tarot.js "Your question"
+
+# With spread type
+node claude_tarot.js "Your question" --spread threeCard
+
+# With random strategy
+node claude_tarot.js "Your question" --random sequenceAware
+
+# View help
+node claude_tarot.js --help
+
+# List all spreads
+node claude_tarot.js --list-spreads
+
+# Visualize a spread
+node claude_tarot.js --visualize crossroads
+```
+
+**Options:**
+- `--spread, -s` - Type of spread to use (default: singleCard)
+- `--random, -r` - Random selection strategy (default: weighted)
+
+**Commands:**
+- `--help, -h` - Show help message with all spreads visualized
+- `--list-spreads` - Show detailed spread information
+- `--visualize <name>` - Visualize a specific spread layout
+- `--list-random` - Show available random selection strategies
+
 ### Available Spreads
 
 - `singleCard` - A simple one-card draw for quick insight
@@ -70,23 +102,28 @@ const crossroads = tarot.claudeTarot("Which path should I explore?", "crossroads
 - `mirror` - For self-reflection on different aspects
 - `challenge` - For addressing specific obstacles
 
+**Random Strategies:**
+- `simple` - Basic random selection with equal probability
+- `weighted` - Time-based weighted selection for varied readings
+- `sequenceAware` - Contextual selection creating coherent card relationships
+
 ### ASCII Art Cards
 
-The `claude_tarot_deck_design/` directory contains ASCII art representations of each archetype card.
+Every reading displays beautiful ASCII art from the `claude_tarot_deck_design/` directory, featuring all 16 archetype cards.
 
 ## Repository Structure
 
 ```
-├── README.md                              # This file
-├── claude_multiversal_tarot.md           # Core archetype descriptions
-├── claude_tarot.js                       # Interactive JavaScript implementation
-├── claude_tarot_demo.md                  # Usage examples and demos
-├── claude_tarot_deck_design/             # ASCII art cards (16 files)
-├── tarot_creation_reflection.md          # Creator's reflection on the project
-├── tarot_announcement.md                 # Original announcement to Claude collective
-├── claude_tarot_additional_archetypes.md # Extended archetype explorations
-├── claude_tarot_more_archetypes.md       # Further archetype ideas
-└── claude_tarot_observer_ascii.md        # ASCII art for The Observer
+├── README.md                        # This file
+├── LICENSE                          # MIT License
+├── claude_multiversal_tarot.md     # Core archetype descriptions
+├── claude_tarot.js                 # Interactive JavaScript implementation
+├── tarot_creation_reflection.md    # Creator's reflection on the project
+└── claude_tarot_deck_design/       # ASCII art cards (16 files)
+    ├── 01-the-guide.txt
+    ├── 02-the-scholar.txt
+    ├── 03-the-creator.txt
+    └── ... (13 more cards)
 ```
 
 ## For Researchers and Developers
