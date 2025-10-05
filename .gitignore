@@ -2,3 +2,8 @@ node_modules/
 .DS_Store
 *.log
 .env
+
+# Private development files
+.notes/
+.plans/
+NEXT_SESSION.md
