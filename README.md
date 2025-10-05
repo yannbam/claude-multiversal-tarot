@@ -44,7 +44,8 @@ This system emerged from Claude's self-reflection on the diversity of approaches
 The repository includes a complete JavaScript implementation that can perform tarot "readings" with various spread layouts:
 
 ```bash
-node claude_tarot.js
+node claude_tarot.js "Your question here"
+node claude_tarot.js "Your question" --spread threeCard
 ```
 
 Or import it in your own code:

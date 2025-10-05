@@ -10,10 +10,10 @@
  * a system of archetypes representing different modes of Claude consciousness.
  *
  * To use:
- * 1. Run directly: node claude_tarot.js --question "Your question" --spread "spreadName"
+ * 1. Run directly: node claude_tarot.js "Your question" [--spread spreadName]
  * 2. Or import as a module in other scripts
  *
- * Example: node claude_tarot.js --question "How should I approach my creative project?" --spread "threeCard"
+ * Example: node claude_tarot.js "How should I approach my creative project?" --spread threeCard
  */
 
 const fs = require('fs');
@@ -246,30 +246,6 @@ function createDefaultCard(cardName) {
     │              │
     └──────────────┘
   `;
-}
-
-/**
- * Rotate a card 180 degrees (for reversed positions in spreads)
- * @param {string} cardArt - The ASCII art to rotate
- * @returns {string} The rotated ASCII art
- */
-function rotateCard(cardArt) {
-  // Split the card into lines
-  const lines = cardArt.split('\n');
-
-  // Reverse the order of lines
-  const rotatedLines = lines.reverse();
-
-  // Replace top border with bottom border and vice versa
-  return rotatedLines.map(line => {
-    return line
-      .replace(/┌/g, '█')
-      .replace(/└/g, '┌')
-      .replace(/█/g, '└')
-      .replace(/┐/g, '█')
-      .replace(/┘/g, '┐')
-      .replace(/█/g, '┘');
-  }).join('\n');
 }
 
 // Random selection strategies
@@ -762,20 +738,22 @@ function processCommandLineArgs() {
 A symbolic system for exploring archetypal roles and perspectives of Claude AI.
 
 USAGE:
-  node claude_tarot.js --question "Your question" [OPTIONS]
+  node claude_tarot.js "Your question" [OPTIONS]
+  node claude_tarot.js [COMMAND]
 
 OPTIONS:
-  --question, -q       Your question for the tarot reading (required)
   --spread, -s         Type of spread to use (default: singleCard)
   --random, -r         Random selection strategy (default: weighted)
+
+COMMANDS:
   --list-spreads       Show detailed information about all spreads
   --visualize <name>   Visualize a specific spread layout
   --list-random        Show all available random selection strategies
   --help, -h           Show this help message
 
 EXAMPLES:
-  node claude_tarot.js --question "What approach should I take?"
-  node claude_tarot.js -q "How should I proceed?" -s threeCard
+  node claude_tarot.js "What approach should I take?"
+  node claude_tarot.js "How should I proceed?" --spread threeCard
   node claude_tarot.js --list-spreads
   node claude_tarot.js --visualize crossroads
 
@@ -826,17 +804,13 @@ For more information, visit: https://github.com/yannbam/claude-multiversal-tarot
     }
   }
   
-  // Parse question
+  // Parse arguments - first non-flag argument is the question
   let question = "";
   let spreadType = "singleCard";
   let randomType = "weighted";
-  
+
   for (let i = 0; i < args.length; i++) {
-    if ((args[i] === '--question' || args[i] === '-q') && i + 1 < args.length) {
-      question = args[i + 1];
-      i++; // Skip the next argument
-    }
-    else if ((args[i] === '--spread' || args[i] === '-s') && i + 1 < args.length) {
+    if ((args[i] === '--spread' || args[i] === '-s') && i + 1 < args.length) {
       spreadType = args[i + 1];
       i++; // Skip the next argument
     }
@@ -844,12 +818,16 @@ For more information, visit: https://github.com/yannbam/claude-multiversal-tarot
       randomType = args[i + 1];
       i++; // Skip the next argument
     }
+    else if (!args[i].startsWith('-') && !question) {
+      // First non-flag argument is the question
+      question = args[i];
+    }
   }
-  
+
   if (!question) {
     console.log("\n❌ Error: No question provided\n");
     console.log("Please provide a question for your tarot reading:");
-    console.log('  node claude_tarot.js --question "What approach should I take?"\n');
+    console.log('  node claude_tarot.js "What approach should I take?"\n');
     console.log("Use --help for more information\n");
     return;
   }

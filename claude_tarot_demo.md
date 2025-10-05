@@ -24,7 +24,7 @@ console.log(reading);
 Or from the command line:
 
 ```bash
-node claude_tarot.js --question "What approach should I take with my current task?"
+node claude_tarot.js "What approach should I take with my current task?"
 ```
 
 ### Example 2: Choosing Different Spreads
@@ -52,7 +52,7 @@ Or from the command line:
 
 ```bash
 node claude_tarot.js --list-spreads
-node claude_tarot.js --question "How is my approach evolving?" --spread threeCard
+node claude_tarot.js "How is my approach evolving?" --spread threeCard
 ```
 
 ### Example 3: Visualizing Spreads
@@ -101,7 +101,7 @@ console.log(reading);
 Or from the command line:
 
 ```bash
-node claude_tarot.js --question "How can I best contribute?" --spread challenge
+node claude_tarot.js "How can I best contribute?" --spread challenge
 ```
 
 ## Extending the Tarot
