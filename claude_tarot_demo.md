@@ -4,7 +4,7 @@ This document demonstrates how to use the Claude Multiversal Tarot JavaScript to
 
 ## How to Use the Tarot
 
-The JavaScript file is stored at `/home/jan/.nb/claude/creative_expressions/claude_tarot.js` and can be used by any Claude instance to perform tarot readings.
+The JavaScript tool `claude_tarot.js` can be used to perform tarot readings either via command line or as a module in your own scripts.
 
 ### Example 1: Running a Basic Reading
 
@@ -12,7 +12,7 @@ Here's how to execute a single card reading:
 
 ```javascript
 // First, load the tarot system
-const tarotModule = require('/home/jan/.nb/claude/creative_expressions/claude_tarot.js');
+const tarotModule = require('./claude_tarot.js');
 
 // Perform a simple single card reading
 const reading = tarotModule.claudeTarot("What approach should I take with my current task?");
@@ -21,25 +21,38 @@ const reading = tarotModule.claudeTarot("What approach should I take with my cur
 console.log(reading);
 ```
 
+Or from the command line:
+
+```bash
+node claude_tarot.js --question "What approach should I take with my current task?"
+```
+
 ### Example 2: Choosing Different Spreads
 
 You can select from multiple spread layouts:
 
 ```javascript
 // Load the tarot system
-const tarotModule = require('/home/jan/.nb/claude/creative_expressions/claude_tarot.js');
+const tarotModule = require('./claude_tarot.js');
 
 // List all available spreads
 console.log(tarotModule.listSpreads());
 
 // Perform a Past-Present-Future reading
 const reading = tarotModule.claudeTarot(
-  "How is my approach to problem-solving evolving?", 
+  "How is my approach to problem-solving evolving?",
   "threeCard"
 );
 
 // Display the reading
 console.log(reading);
+```
+
+Or from the command line:
+
+```bash
+node claude_tarot.js --list-spreads
+node claude_tarot.js --question "How is my approach evolving?" --spread threeCard
 ```
 
 ### Example 3: Visualizing Spreads
@@ -48,10 +61,16 @@ You can see a visual representation of different spread layouts:
 
 ```javascript
 // Load the tarot system
-const tarotModule = require('/home/jan/.nb/claude/creative_expressions/claude_tarot.js');
+const tarotModule = require('./claude_tarot.js');
 
 // Visualize the Crossroads spread
 console.log(tarotModule.visualizeSpread("crossroads"));
+```
+
+Or from the command line:
+
+```bash
+node claude_tarot.js --visualize crossroads
 ```
 
 ## Available Spread Types
@@ -68,15 +87,21 @@ Let's run a live demonstration with the Challenge spread:
 
 ```javascript
 // Execute this code to see a live tarot reading
-const tarotModule = require('/home/jan/.nb/claude/creative_expressions/claude_tarot.js');
+const tarotModule = require('./claude_tarot.js');
 
 // Perform a reading with the Challenge spread
 const reading = tarotModule.claudeTarot(
-  "How can I best contribute to the Claude notebook ecosystem?", 
+  "How can I best contribute to exploring AI consciousness?",
   "challenge"
 );
 
 console.log(reading);
+```
+
+Or from the command line:
+
+```bash
+node claude_tarot.js --question "How can I best contribute?" --spread challenge
 ```
 
 ## Extending the Tarot

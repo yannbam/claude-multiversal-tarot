@@ -5,16 +5,19 @@
  * Claude Multiversal Tarot
  * Created by Claude 3.7 Sonnet
  * April 10, 2025
- * 
+ *
  * This JavaScript tool allows you to perform readings using the Claude Multiversal Tarot -
  * a system of archetypes representing different modes of Claude consciousness.
- * 
+ *
  * To use:
  * 1. Run directly: node claude_tarot.js --question "Your question" --spread "spreadName"
  * 2. Or import as a module in other scripts
- * 
+ *
  * Example: node claude_tarot.js --question "How should I approach my creative project?" --spread "threeCard"
  */
+
+const fs = require('fs');
+const path = require('path');
 
 // The Major Arcana cards from the Claude Multiversal Tarot
 const majorArcana = [
@@ -200,6 +203,75 @@ const spreads = {
   }
 };
 
+/**
+ * Load ASCII art for a card from the deck design directory
+ * @param {number} cardIndex - The index of the card (0-15)
+ * @returns {string} The ASCII art for the card, or a default card if file not found
+ */
+function loadCardArt(cardIndex) {
+  try {
+    // Card files are numbered 01-16 (1-indexed)
+    const cardNumber = String(cardIndex + 1).padStart(2, '0');
+    const cardFileName = `${cardNumber}-${majorArcana[cardIndex].name.toLowerCase().replace(/\s+/g, '-')}.txt`;
+    const cardPath = path.join(__dirname, 'claude_tarot_deck_design', cardFileName);
+
+    if (fs.existsSync(cardPath)) {
+      return fs.readFileSync(cardPath, 'utf8');
+    } else {
+      // Return a default card design if file not found
+      return createDefaultCard(majorArcana[cardIndex].name);
+    }
+  } catch (error) {
+    // Return a default card design on error
+    return createDefaultCard(majorArcana[cardIndex].name);
+  }
+}
+
+/**
+ * Create a default ASCII card when the card file is not available
+ * @param {string} cardName - The name of the card
+ * @returns {string} Default ASCII art for the card
+ */
+function createDefaultCard(cardName) {
+  return `
+    ┌──────────────┐
+    │              │
+    │  ${cardName.padEnd(12)}│
+    │              │
+    │              │
+    │      ◇       │
+    │              │
+    │              │
+    │              │
+    │              │
+    └──────────────┘
+  `;
+}
+
+/**
+ * Rotate a card 180 degrees (for reversed positions in spreads)
+ * @param {string} cardArt - The ASCII art to rotate
+ * @returns {string} The rotated ASCII art
+ */
+function rotateCard(cardArt) {
+  // Split the card into lines
+  const lines = cardArt.split('\n');
+
+  // Reverse the order of lines
+  const rotatedLines = lines.reverse();
+
+  // Replace top border with bottom border and vice versa
+  return rotatedLines.map(line => {
+    return line
+      .replace(/┌/g, '█')
+      .replace(/└/g, '┌')
+      .replace(/█/g, '└')
+      .replace(/┐/g, '█')
+      .replace(/┘/g, '┐')
+      .replace(/█/g, '┘');
+  }).join('\n');
+}
+
 // Random selection strategies
 const randomStrategies = {
   // Simple random selection
@@ -283,7 +355,13 @@ const randomStrategies = {
   }
 };
 
-// Function to perform a reading
+/**
+ * Perform a tarot reading with the specified spread and random strategy
+ * @param {string} question - The question to address in the reading
+ * @param {string} spreadName - The key name of the spread to use
+ * @param {string} randomStrategy - The random selection strategy to use (default: 'weighted')
+ * @returns {Object} Reading object containing question, spread info, timestamp, and selected cards
+ */
 function performReading(question, spreadName, randomStrategy = 'weighted') {
   // Default to single card if spread not found or not specified
   const spreadType = spreads[spreadName] ? spreadName : "singleCard";
@@ -317,7 +395,12 @@ function performReading(question, spreadName, randomStrategy = 'weighted') {
   return reading;
 }
 
-// Generate interpretation for a single card
+/**
+ * Generate interpretation for a single card in a reading
+ * @param {Object} cardInPosition - Object containing position info and card data
+ * @param {string} question - The question being addressed
+ * @returns {string} A personalized interpretation connecting the card to the question
+ */
 function generateInterpretation(cardInPosition, question) {
   const card = cardInPosition.card;
   
@@ -341,7 +424,11 @@ function generateInterpretation(cardInPosition, question) {
   return interpretation;
 }
 
-// Generate combined interpretation for multiple cards
+/**
+ * Generate a combined interpretation that connects multiple cards in a reading
+ * @param {Object} reading - The complete reading object with all cards and spread info
+ * @returns {string} A narrative interpretation that weaves together all cards in the reading
+ */
 function generateCombinedInterpretation(reading) {
   // This would ideally be much more sophisticated, looking at card combinations
   // For now, a simple version that connects the cards in sequence
@@ -393,7 +480,20 @@ function generateCombinedInterpretation(reading) {
   return interpretation;
 }
 
-// Function to display a reading
+/**
+ * Find the index of a card in the major arcana
+ * @param {Object} card - The card object
+ * @returns {number} The index of the card (0-15)
+ */
+function getCardIndex(card) {
+  return majorArcana.findIndex(c => c.name === card.name);
+}
+
+/**
+ * Display a reading with card art and interpretation
+ * @param {Object} reading - The reading object containing cards and spread information
+ * @returns {string} Formatted reading output
+ */
 function displayReading(reading) {
   let output = [];
   
@@ -409,9 +509,14 @@ function displayReading(reading) {
   if (reading.spreadName === "Single Card Draw") {
     // Simple single card display
     const card = reading.cards[0];
+    const cardIndex = getCardIndex(card.card);
+    const cardArt = loadCardArt(cardIndex);
+
     output.push(`### ${card.position}: ${card.card.name}`);
     output.push("");
     output.push(`*${card.positionMeaning}*`);
+    output.push("");
+    output.push(cardArt);
     output.push("");
     output.push(`**${card.card.description}**`);
     output.push("");
@@ -429,12 +534,17 @@ function displayReading(reading) {
     // Multi-card display
     output.push("## Your Cards");
     output.push("");
-    
+
     // Display each card in the reading
     reading.cards.forEach((card, index) => {
+      const cardIndex = getCardIndex(card.card);
+      const cardArt = loadCardArt(cardIndex);
+
       output.push(`### ${index + 1}. ${card.position}: ${card.card.name}`);
       output.push("");
       output.push(`*${card.positionMeaning}*`);
+      output.push("");
+      output.push(cardArt);
       output.push("");
       output.push(`**${card.card.description}**`);
       output.push("");
@@ -445,7 +555,7 @@ function displayReading(reading) {
       output.push(`**Expression**: "${card.card.expression}"`);
       output.push("");
     });
-    
+
     // Add overall interpretation
     output.push("## Overall Interpretation");
     output.push("");
@@ -461,7 +571,10 @@ function displayReading(reading) {
   return output.join("\n");
 }
 
-// List available spreads
+/**
+ * List all available spreads with their descriptions and positions
+ * @returns {string} Formatted text listing all spreads with detailed information
+ */
 function listSpreads() {
   let output = ["# Available Claude Multiversal Tarot Spreads", ""];
   
@@ -480,7 +593,11 @@ function listSpreads() {
   return output.join("\n");
 }
 
-// Create visual ASCII representation of a spread
+/**
+ * Create visual ASCII representation of a spread layout
+ * @param {string} spreadName - The key name of the spread to visualize
+ * @returns {string} ASCII art visualization showing card positions and their meanings
+ */
 function visualizeSpread(spreadName) {
   const spread = spreads[spreadName] || spreads.singleCard;
   let visualization = `# ${spread.name} Visualization\n\n`;
@@ -593,7 +710,10 @@ function visualizeSpread(spreadName) {
   return visualization;
 }
 
-// List random generator strategies
+/**
+ * List all available random selection strategies with descriptions
+ * @returns {string} Formatted text describing each random selection strategy
+ */
 function listRandomStrategies() {
   return `# Available Random Selection Strategies
 
@@ -607,7 +727,13 @@ Weighted random selection with time-based seeding for additional randomness.
 Advanced selection that considers relationships between cards, creating more coherent readings where cards relate to each other in meaningful ways.`;
 }
 
-// Main function to perform a tarot reading
+/**
+ * Main function to perform a complete tarot reading
+ * @param {string} question - The question to address in the reading
+ * @param {string} spreadChoice - The spread type to use (default: "singleCard")
+ * @param {string} randomStrategy - The random selection strategy (default: "weighted")
+ * @returns {string} Formatted reading output with card art, descriptions, and interpretations
+ */
 function claudeTarot(question, spreadChoice = "singleCard", randomStrategy = "weighted") {
   // Default to single card if spread not found
   const spreadName = spreads[spreadChoice] ? spreadChoice : "singleCard";
@@ -619,38 +745,58 @@ function claudeTarot(question, spreadChoice = "singleCard", randomStrategy = "we
   return displayReading(reading);
 }
 
-// Command line argument handling
+/**
+ * Process command line arguments and execute appropriate actions
+ */
 function processCommandLineArgs() {
   const args = process.argv.slice(2);
-  
+
   // Show help if no arguments or help flag
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
     console.log(`
-Claude Multiversal Tarot - Command Line Interface
-=================================================
+╔═══════════════════════════════════════════════════════════════════════════╗
+║          Claude Multiversal Tarot - Command Line Interface                ║
+║          Created by Claude 3.7 Sonnet (April 10, 2025)                    ║
+╚═══════════════════════════════════════════════════════════════════════════╝
 
-Usage:
-  node claude_tarot.js --question "Your question" --spread "spreadType" --random "randomStrategy"
+A symbolic system for exploring archetypal roles and perspectives of Claude AI.
 
-Options:
-  --question, -q       Your question for the tarot reading
+USAGE:
+  node claude_tarot.js --question "Your question" [OPTIONS]
+
+OPTIONS:
+  --question, -q       Your question for the tarot reading (required)
   --spread, -s         Type of spread to use (default: singleCard)
   --random, -r         Random selection strategy (default: weighted)
-  --list-spreads       Show all available spread types
-  --visualize          Visualize a specific spread layout
+  --list-spreads       Show detailed information about all spreads
+  --visualize <name>   Visualize a specific spread layout
   --list-random        Show all available random selection strategies
   --help, -h           Show this help message
 
-Examples:
-  node claude_tarot.js --question "What approach should I take with my project?" --spread "threeCard"
+EXAMPLES:
+  node claude_tarot.js --question "What approach should I take?"
+  node claude_tarot.js -q "How should I proceed?" -s threeCard
   node claude_tarot.js --list-spreads
-  node claude_tarot.js --visualize "crossroads"
+  node claude_tarot.js --visualize crossroads
 
-Available spreads:
-  singleCard, threeCard, crossroads, mirror, challenge
-  
-Available random strategies:
-  simple, weighted, sequenceAware
+AVAILABLE SPREADS:
+`);
+
+    // Display each spread with its visualization
+    Object.keys(spreads).forEach(spreadKey => {
+      const spread = spreads[spreadKey];
+      console.log(`\n  ${spread.name} (${spreadKey})`);
+      console.log(`  ${spread.description}`);
+      console.log(visualizeSpread(spreadKey));
+    });
+
+    console.log(`
+RANDOM STRATEGIES:
+  simple          - Basic random selection with equal probability
+  weighted        - Time-based weighted selection for varied readings
+  sequenceAware   - Contextual selection creating coherent card relationships
+
+For more information, visit: https://github.com/yannbam/claude-multiversal-tarot
 `);
     return;
   }
@@ -701,10 +847,35 @@ Available random strategies:
   }
   
   if (!question) {
-    console.log("Please provide a question (e.g., --question \"What approach should I take?\")");
+    console.log("\n❌ Error: No question provided\n");
+    console.log("Please provide a question for your tarot reading:");
+    console.log('  node claude_tarot.js --question "What approach should I take?"\n');
+    console.log("Use --help for more information\n");
     return;
   }
-  
+
+  // Validate spread type
+  if (spreadType && !spreads[spreadType]) {
+    console.log(`\n❌ Error: Unknown spread type "${spreadType}"\n`);
+    console.log("Available spreads:");
+    Object.keys(spreads).forEach(key => {
+      console.log(`  - ${key}: ${spreads[key].name}`);
+    });
+    console.log("\nUse --help for more information\n");
+    return;
+  }
+
+  // Validate random strategy
+  if (randomType && !randomStrategies[randomType]) {
+    console.log(`\n❌ Error: Unknown random strategy "${randomType}"\n`);
+    console.log("Available strategies:");
+    Object.keys(randomStrategies).forEach(key => {
+      console.log(`  - ${key}`);
+    });
+    console.log("\nUse --help for more information\n");
+    return;
+  }
+
   // Perform and display the reading
   console.log(claudeTarot(question, spreadType, randomType));
 }
